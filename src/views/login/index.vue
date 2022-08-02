@@ -59,7 +59,7 @@
         type="primary"
         style="width: 100%; margin-bottom: 30px"
         @click="login"
-        :plain="true"
+        :loading="isLogin"
       >
         登录
       </el-button>
@@ -89,6 +89,7 @@ export default {
       },
       passwordType: "password",
       img: "",
+      isLogin: false,
     };
   },
   created() {
@@ -106,20 +107,15 @@ export default {
       });
     },
     async login() {
+      this.isLogin = true;
       try {
         await this.$refs.loginForm.validate();
-        this.$store.dispatch("user/getToken", this.loginForm).then(() => {
-          if (this.$store.state.user.token === null) {
-            this.$message({
-              message: this.$store.state.user.data.msg,
-              showClose: true,
-              type: "error",
-            });
-          } else {
-            this.$router.push('/')
-          }
-        });
-      } catch (error) {}
+        await this.$store.dispatch("user/getToken", this.loginForm);
+        this.$router.push("/");
+        this.$message.success("登录成功");
+      } finally {
+        this.isLogin = false;
+      }
     },
     async changeImage() {
       try {
