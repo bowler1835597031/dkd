@@ -1,23 +1,26 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-
+    <el-form
+      ref="loginForm"
+      :model="loginForm"
+      :rules="loginRules"
+      class="login-form"
+      auto-complete="on"
+      label-position="left"
+    >
+      <!-- logo -->
       <div class="title-container">
-        <img class="login-logo" src="../../assets/img/logo.png">
+        <img class="login-logo" src="../../assets/img/logo.png" />
       </div>
-
-      <el-form-item prop="username">
+      <!-- 表单区域 -->
+      <el-form-item prop="loginName">
         <span class="svg-container">
           <i class="el-icon-mobile-phone" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
+          v-model="loginForm.loginName"
+          placeholder="请输入账号"
           type="text"
-          tabindex="1"
-          auto-complete="on"
         />
       </el-form-item>
 
@@ -27,121 +30,115 @@
         </span>
         <el-input
           :key="passwordType"
-          ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
+          placeholder="请输入密码"
         />
         <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          <svg-icon
+            :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"
+          />
         </span>
       </el-form-item>
-      <el-form-item prop="yzm">
+
+      <el-form-item prop="code">
         <span class="svg-container">
           <i class="el-icon-chat-line-square" />
         </span>
         <el-input
-          v-model="loginForm.yzm"
+          v-model="loginForm.code"
           type="text"
           placeholder="请输入验证码"
-          name="yzm"
-          tabindex="3"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
         />
-        <img src="../../assets/img/yzm.png">
+        <div class="yzm" @click="changeImage">
+          <img :src="img" />
+        </div>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
-
+      <el-button
+        type="primary"
+        style="width: 100%; margin-bottom: 30px"
+        @click="login"
+        :plain="true"
+      >
+        登录
+      </el-button>
     </el-form>
   </div>
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
-
+import { getCode } from "@/api/user";
 export default {
-  name: 'Login',
+  name: "login",
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
-        callback()
-      }
-    }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'admin',
-        yzm: ''
+        loginName: "admin",
+        password: "admin",
+        code: "",
+        clientToken: "",
+        loginType: 0,
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        loginName: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+        ],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
       },
-      loading: false,
-      passwordType: 'password',
-      redirect: undefined
-    }
+      passwordType: "password",
+      img: "",
+    };
   },
-  watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
-    }
+  created() {
+    this.changeImage();
   },
   methods: {
     showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
+      if (this.passwordType === "password") {
+        this.passwordType = "";
       } else {
-        this.passwordType = 'password'
+        this.passwordType = "password";
       }
       this.$nextTick(() => {
-        this.$refs.password.focus()
-      })
+        this.$refs.password.focus();
+      });
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
-    }
-  }
-}
+    async login() {
+      try {
+        await this.$refs.loginForm.validate();
+        this.$store.dispatch("user/getToken", this.loginForm).then(() => {
+          if (this.$store.state.user.token === null) {
+            this.$message({
+              message: this.$store.state.user.data.msg,
+              showClose: true,
+              type: "error",
+            });
+          } else {
+            this.$router.push('/')
+          }
+        });
+      } catch (error) {}
+    },
+    async changeImage() {
+      try {
+        this.loginForm.clientToken = Math.floor(Math.random() * 10000);
+        const res = await getCode(this.loginForm.clientToken);
+        // console.log(res);
+        this.img = res.request.responseURL;
+      } catch (error) {}
+    },
+  },
+};
 </script>
 
 <style lang="scss">
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
-$bg:#283443;
-$light_gray:#fff;
+$bg: #283443;
+$light_gray: #fff;
 $cursor: #fff;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
@@ -152,7 +149,6 @@ $cursor: #fff;
 
 /* reset element-ui css */
 .login-container {
-
   .el-input {
     display: inline-block;
     height: 47px;
@@ -185,16 +181,16 @@ $cursor: #fff;
 </style>
 
 <style lang="scss" scoped>
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$dark_gray: #889aa4;
+$light_gray: #eee;
 
 .login-container {
   min-height: 100%;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
-  background: url('../../assets/img/background.png') no-repeat;
+  background: url("../../assets/img/background.png") no-repeat;
   background-size: cover;
 
   .login-form {
@@ -210,32 +206,31 @@ $light_gray:#eee;
     box-shadow: 0 3px 70px 0 rgb(30 111 72 / 35%);
     border-radius: 10px;
 
-  ::v-deep .el-form-item{
-          width: 100%;
-    height: 52px;
-    margin-bottom: 24px;
-    background: #fff;
-    border: 1px solid #e2e2e2;
-     .el-input input {
-      color: #999 !important;
+    ::v-deep .el-form-item {
+      width: 100%;
+      height: 52px;
+      margin-bottom: 24px;
+      background: #fff;
+      border: 1px solid #e2e2e2;
+      .el-input input {
+        color: #999 !important;
       }
-      .el-form-item__content{
+      .el-form-item__content {
         display: flex;
       }
     }
-
   }
-  .el-button--primary{
-        width: 100%;
+  .el-button--primary {
+    width: 100%;
     height: 52px;
-    background: linear-gradient(262deg,#2e50e1,#6878f0);
-        opacity: .91;
+    background: linear-gradient(262deg, #2e50e1, #6878f0);
+    opacity: 0.91;
     border-radius: 8px;
     color: #fff;
     text-shadow: 0 7px 22px #cfcfcf;
-    border-color:unset;
+    border-color: unset;
   }
-  ::v-deep .elcol{
+  ::v-deep .elcol {
     width: 30px;
     height: 30px;
     background-color: #999;
@@ -268,11 +263,10 @@ $light_gray:#eee;
     top: -46px;
     left: 50%;
     margin-left: -48px;
-    img{
+    img {
       width: 100%;
       height: 100%;
     }
   }
 }
-
 </style>
