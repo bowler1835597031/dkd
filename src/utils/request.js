@@ -8,18 +8,19 @@ const service = axios.create({
 service.interceptors.request.use(); // 请求拦截器
 service.interceptors.response.use(
   (res) => {
-    if (!res.request.responseURL && res.data.token !== null) {
-      const { success, data, message } = res.data;
-      if (success) {
-        return data;
-      }
-      Message.error(message);
-      return Promise.reject(new Error(message));
+    console.log(res);
+    if (res.config.url.includes("/likede/api/user-service/user/imageCode/")) {
+      return res;
     }
-    return res;
+    const { success, msg } = res.data;
+    if (success) {
+      return res.data;
+    }
+    Message.error(msg);
+    return Promise.reject(new Error(msg));
   },
   function (error) {
-    Message.error(message);
+    Message.error("登录异常");
     return Promise.reject(error);
   }
 ); // 响应拦截器

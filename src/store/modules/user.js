@@ -3,12 +3,10 @@ export default {
   namespaced: true,
   state: {
     token: "",
-    data: {},
   },
   mutations: {
     setToken(state, payload) {
       state.token = payload.token;
-      state.data = payload;
     },
   },
   actions: {
