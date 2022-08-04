@@ -4,11 +4,15 @@
     <div class="info">
       <div class="info-item">
         <div class="info-img">
-          <img src="../../assets/img/下载.png" alt="" />
+          <img :src="$store.state.user.userInfo.image" alt="" />
         </div>
         <div class="info-msg">
-          <span class="welcome">欢迎您，<span>admin</span></span>
-          <span class="esc">退出▾</span>
+          <span class="welcome"
+            >欢迎您，<span>{{
+              $store.state.user.userInfo.userName
+            }}</span></span
+          >
+          <span class="esc" @click="logout">退出▾</span>
         </div>
       </div>
     </div>
@@ -23,7 +27,12 @@ export default {
 
   created() {},
 
-  methods: {},
+  methods: {
+    async logout() {
+      await this.$store.dispatch("user/logout");
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    },
+  },
 };
 </script>
 

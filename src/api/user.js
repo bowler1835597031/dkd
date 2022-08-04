@@ -23,3 +23,15 @@ export function getCode(clientToken) {
     // method: "GET",
   });
 }
+
+/**
+ *获取用户基本信息
+ * @param {integer} id 用户id
+ * @returns Promise
+ */
+export function getUserInfoApi(id) {
+  return request({
+    url: `/api/user-service/user/${id}`,
+    // method: "GET",
+  });
+}
