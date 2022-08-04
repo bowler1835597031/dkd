@@ -1,93 +1,71 @@
 <template>
-  <div :class="classObj" class="app-wrapper">
-    <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
-    <sidebar class="sidebar-container" />
-    <div class="main-container">
-      <div :class="{'fixed-header':fixedHeader}">
-        <navbar />
-      </div>
-      <app-main />
-    </div>
+  <div class="layout">
+    <el-container>
+      <el-header><Dheader></Dheader></el-header>
+      <el-container>
+        <el-aside width="167px"><Dsidebar></Dsidebar></el-aside>
+        <el-main><router-view></router-view></el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
 <script>
-import { Navbar, Sidebar, AppMain } from './components'
-import ResizeMixin from './mixin/ResizeHandler'
-
+import Dheader from "@/layout/components/header.vue";
+import Dsidebar from "@/layout/components/sidebar.vue";
 export default {
-  name: 'Layout',
+  data() {
+    return {};
+  },
   components: {
-    Navbar,
-    Sidebar,
-    AppMain
+    Dheader,
+    Dsidebar
   },
-  mixins: [ResizeMixin],
-  computed: {
-    sidebar() {
-      return this.$store.state.app.sidebar
-    },
-    device() {
-      return this.$store.state.app.device
-    },
-    fixedHeader() {
-      return this.$store.state.settings.fixedHeader
-    },
-    classObj() {
-      return {
-        hideSidebar: !this.sidebar.opened,
-        openSidebar: this.sidebar.opened,
-        withoutAnimation: this.sidebar.withoutAnimation,
-        mobile: this.device === 'mobile'
-      }
-    }
-  },
-  methods: {
-    handleClickOutside() {
-      this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
-    }
-  }
-}
+  created() {},
+
+  methods: {},
+};
 </script>
 
-<style lang="scss" scoped>
-  @import "~@/styles/mixin.scss";
-  @import "~@/styles/variables.scss";
+<style scoped lang="scss">
+.layout {
+  width: 100%;
+  height: 100%;
+  .el-header {
+    background-color: #b3c0d1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+    padding: 0 0;
+  }
 
-  .app-wrapper {
-    @include clearfix;
-    position: relative;
+  .el-aside {
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
     height: 100%;
-    width: 100%;
-    &.mobile.openSidebar{
-      position: fixed;
-      top: 0;
-    }
   }
-  .drawer-bg {
-    background: #000;
-    opacity: 0.3;
+
+  .el-main {
+    background-color: #e9eef3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+
+  .el-container {
     width: 100%;
-    top: 0;
     height: 100%;
-    position: absolute;
-    z-index: 999;
   }
 
-  .fixed-header {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 9;
-    width: calc(100% - #{$sideBarWidth});
-    transition: width 0.28s;
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
   }
 
-  .hideSidebar .fixed-header {
-    width: calc(100% - 54px)
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
   }
-
-  .mobile .fixed-header {
-    width: 100%;
-  }
+}
 </style>
