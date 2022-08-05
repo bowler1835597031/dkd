@@ -17,32 +17,18 @@ const service = axios.create({
   timeout: 5000, // 定义5秒超时
 }); // 创建一个axios的实例
 
-// service.interceptors.request.use(async (config) => {
-//   // console.log(config);
-//   if (store.state.user.token) {
-//     if (isTimeOut()) {
-//       await store.dispatch("user/logout");
-//       router.push("/login");
-//       return Promise.reject(new Error("登录过期"));
-//       // console.log("跳转到登录页");
-//     } else {
-//       config.headers.Authorization = store.state.user.token;
-//     }
-//   }
-//   return config;
-// }); // 请求拦截器
-
 service.interceptors.request.use(async (config) => {
   // console.log(config);
   if (store.state.user.token) {
-    if (isTimeOut()) {
-      await store.dispatch("user/logout");
-      router.push("/login");
-      return Promise.reject(new Error("登录过期"));
-      // console.log("跳转到登录页");
-    } else {
-      config.headers.Authorization = store.state.user.token;
-    }
+    // console.log(111);
+    // if (isTimeOut()) {
+    //   await store.dispatch("user/logout");
+    //   router.push("/login");
+    //   return Promise.reject(new Error("登录过期"));
+    // } else {
+    //   config.headers.Authorization = store.state.user.token;
+    // }
+    config.headers.Authorization = store.state.user.token;
   }
   return config;
 }); // 请求拦截器
@@ -53,12 +39,13 @@ service.interceptors.response.use(
     if (res.config.url.includes("/likede/api/user-service/user/imageCode/")) {
       return res;
     }
-    const { success, msg } = res.data;
-    if (success) {
-      return res.data;
-    }
-    Message.error(msg);
-    return Promise.reject(new Error(msg));
+    // const { success, msg } = res.data;
+    // if (success) {
+    //   return res.data;
+    // }
+
+    // Message.error("123");
+    return res;
   },
   function (error) {
     Message.error("登录异常");

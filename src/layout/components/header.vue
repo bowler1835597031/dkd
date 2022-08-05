@@ -4,14 +4,15 @@
     <div class="info">
       <div class="info-item">
         <div class="info-img">
-          <img :src="$store.state.user.userInfo.image" alt="" />
+          <img
+            :src="$store.state.user.userInfo.data.image+'2123'"
+            v-imgError="defaultImg"
+          />
         </div>
         <div class="info-msg">
           <span class="welcome"
-            >欢迎您，<span>{{
-              $store.state.user.userInfo.userName
-            }}</span></span
-          >
+            >欢迎您，<span>{{ $store.state.user.userInfo.data.userName }}</span>
+          </span>
           <span class="esc" @click="logout">退出▾</span>
         </div>
       </div>
@@ -20,9 +21,12 @@
 </template>
 
 <script>
+import defaultImg from "@/assets/img/下载.png";
 export default {
   data() {
-    return {};
+    return {
+      defaultImg,
+    };
   },
 
   created() {},
